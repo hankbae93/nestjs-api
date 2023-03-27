@@ -1,73 +1,135 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
-</p>
+# Nestjs-tutorial
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+## Controller
+```ts
+// express.js
+router.get("/hello", async (req, res) => {
+  try {
+    return res.status(200).json("Hello EveryBody")
+  } catch (error) {
+    console.error(error);
+    res.status(500).json(error)
+  }
+})
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
-
-## Description
-
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Installation
-
-```bash
-$ npm install
+// nest.js
+@Get('/hello')
+sayHello(): string {
+  return 'Hello EveryBody';
+}
 ```
 
-## Running the app
+url을 가져오고 함수 리턴
+
+express의 라우터
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+nest g co [router name]
+// nest generate controller
 ```
 
-## Test
+자동으로 해당 라우트로 컨트롤러  생성해줌
+
+
+## Service
+
+```ts
+@Get('/hi')
+  getHi(): string {
+    return this.appService.getHi();
+  }
+}
+```
+
+Controller의 함수명으로 서비스함수 네이밍을 하는 게 컨벤션
+
+서비스에는 보통 DB를 조회하는 로직이나 연산 로직이 들어감.
+
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+nest g s [controller name]
 ```
 
-## Support
+## Entity
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+```js
+// express.js - models
+const DataTypes = require('sequelize');
+const { Model } = DataTypes;
 
-## Stay in touch
+module.exports = class Comment extends Model {
+  static init(sequelize) {
+    return super.init({
+      content: {
+        type: DataTypes.TEXT,
+        allowNull: false,
+      }
+    }, {
+      modelName: 'Comment',
+      tableName: 'comments',
+      charset: 'utf8mb4',
+      collate: 'utf8mb4_general_ci',
+      sequelize,
+    });
+  }
+  static associate(db) {
+    db.Comment.belongsTo(db.User);
+    db.Comment.belongsTo(db.Post);
+  }
+};
+```
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+Express.js에서 sequelize를 활용하여 ORM을 할 때 생성할 스키마의 컬럼명, 타입, null을 허락할 것인지 등등을 선언해줬었는데 
 
-## License
+Nest.js의 Entity 또한 같은 역할을 한다.
 
-Nest is [MIT licensed](LICENSE).
+```ts
+
+```
+
+## dto
+
+```ts
+@Post()
+  create(@Body() movieData: CreateMovieDto) {
+    return this.moviesService.create(movieData);
+  }
+```
+
+Body의 값을 Validate하고 싶을 때 dto 타입을 선언한다. 하지만 이건 런타임에서 검증을 해줄 수 없다.
+
+```bash
+npm i class-transformer class-validator
+```
+
+다음 라이브러리들을 설치하면 런타임에서 타입만으로 검증해줄 수 있다.
+
+```ts
+import { NestFactory } from '@nestjs/core';
+import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
+
+async function bootstrap() {
+  const app = await NestFactory.create(AppModule);
+  app.useGlobalPipes(new ValidationPipe()); // 다음 코드 추가
+  await app.listen(3000);
+}
+bootstrap();
+```
+
+```ts
+import { IsNumber, IsString } from 'class-validator';
+
+export class CreateMovieDto {
+  @IsString()
+  readonly title: string;
+  @IsNumber()
+  readonly year: number;
+  @IsString({ each: true })
+  readonly genres: string[];
+}
+```
+
+다음 데코레이터들을 사용하면 런타임에서 dto로 검증해줄 수 있다.
+
+
