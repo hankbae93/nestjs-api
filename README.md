@@ -84,7 +84,13 @@ Express.js에서 sequelize를 활용하여 ORM을 할 때 생성할 스키마의
 Nest.js의 Entity 또한 같은 역할을 한다.
 
 ```ts
+export class Movie {
+  id: number;
+  title: string;
 
+  year: number;
+  genres: string[];
+}
 ```
 
 ## dto
@@ -123,8 +129,10 @@ import { IsNumber, IsString } from 'class-validator';
 export class CreateMovieDto {
   @IsString()
   readonly title: string;
+  
   @IsNumber()
   readonly year: number;
+  
   @IsString({ each: true })
   readonly genres: string[];
 }
@@ -132,4 +140,36 @@ export class CreateMovieDto {
 
 다음 데코레이터들을 사용하면 런타임에서 dto로 검증해줄 수 있다.
 
+```json
+{
+    "statusCode": 400,
+    "message": [
+        "property hacked should not exist",
+        "title must be a string",
+        "year must be a number conforming to the specified constraints",
+        "each value in genres must be a string"
+    ],
+    "error": "Bad Request"
+}
+```
+
+dto에 맞지 않은 바디를 보낼 시 검증과 메세지까지 같이 해주는 것을 확인해볼 수 있다.
+
+
+## Test
+
+jest 라이브러리에서는 테스팅하고 싶은 파일에  .spec.ts 확장자를 붙이면 된다.
+
+```ts
+ describe('/movies/:id', () => {
+    it('GET', () => {
+      return request(app.getHttpServer()).get('/movies/1').expect(200);
+    }); 
+    // 404 Not Found Error
+  });
+```
+
+url에서 파라미터를 타입에 맞게 변환해주는 transform 옵션이 e2e테스트에서는 작동하지 않아 에러가 나는 상황이다.
+
+테스트를 적용할 때는 테스트 어플리케이션에도 같은 세팅을 해야한다.
 
